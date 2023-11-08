@@ -114,7 +114,7 @@ class PytorchModel(LLM):
             )
         from .compression import load_compress_model
 
-        cuda_visible_devices_env = os.getenv("CUDA_VISIBLE_DEVICES", None)
+        cuda_visible_devices_env = os.getenv("HIP_VISIBLE_DEVICES", None)
         cuda_visible_devices = (
             cuda_visible_devices_env.split(",") if cuda_visible_devices_env else []
         )
@@ -194,7 +194,7 @@ class PytorchModel(LLM):
             )
 
         if device == "auto":
-            # When env CUDA_VISIBLE_DEVICES=-1, torch.cuda.is_available() return False
+            # When env HIP_VISIBLE_DEVICES=-1, torch.cuda.is_available() return False
             if torch.cuda.is_available():
                 return "cuda"
             elif torch.backends.mps.is_available():

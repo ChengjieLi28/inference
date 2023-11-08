@@ -69,7 +69,7 @@ class LLM(abc.ABC):
     def _get_cuda_count():
         from ...utils import cuda_count
 
-        cuda_visible_devices = os.getenv("CUDA_VISIBLE_DEVICES", None)
+        cuda_visible_devices = os.getenv("HIP_VISIBLE_DEVICES", None)
         if cuda_visible_devices is None:
             return cuda_count()
 

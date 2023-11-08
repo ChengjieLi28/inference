@@ -78,7 +78,7 @@ class SpeculativeModel(PytorchChatModel):
                 f"Failed to import module 'torch'. Please make sure 'torch' is installed.\n\n"
             )
 
-        cuda_visible_devices_env = os.getenv("CUDA_VISIBLE_DEVICES", None)
+        cuda_visible_devices_env = os.getenv("HIP_VISIBLE_DEVICES", None)
         cuda_visible_devices = (
             cuda_visible_devices_env.split(",") if cuda_visible_devices_env else []
         )

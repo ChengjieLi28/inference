@@ -30,7 +30,7 @@ async def start_worker_components(
     address: str, supervisor_address: str, main_pool: MainActorPoolType
 ):
     cuda_device_indices = []
-    cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES")
+    cuda_visible_devices = os.environ.get("HIP_VISIBLE_DEVICES")
     if cuda_visible_devices:
         cuda_device_indices.extend([int(i) for i in cuda_visible_devices.split(",")])
     else:

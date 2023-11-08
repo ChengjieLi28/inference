@@ -22,12 +22,12 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import xoscar as xo
 from xoscar import MainActorPoolType
 
+from .resource import gather_node_info
+from .utils import log_async, log_sync, parse_replica_model_uid, purge_dir
 from ..constants import XINFERENCE_CACHE_DIR
 from ..core import ModelActor
 from ..model.core import ModelDescription, create_model_instance
 from ..utils import cuda_count
-from .resource import gather_node_info
-from .utils import log_async, log_sync, parse_replica_model_uid, purge_dir
 
 logger = getLogger(__name__)
 
@@ -178,10 +178,10 @@ class WorkerActor(xo.StatelessActor):
                 if model_type == "embedding"
                 else self.allocate_devices(model_uid=model_uid, n_gpu=gpu_cnt)
             )
-            env["CUDA_VISIBLE_DEVICES"] = ",".join([str(dev) for dev in devices])
+            env["HIP_VISIBLE_DEVICES"] = ",".join([str(dev) for dev in devices])
             logger.debug(f"GPU selected: {devices} for model {model_uid}")
         if n_gpu is None:
-            env["CUDA_VISIBLE_DEVICES"] = "-1"
+            env["HIP_VISIBLE_DEVICES"] = "-1"
             logger.debug(f"GPU disabled for model {model_uid}")
 
         if os.name != "nt" and platform.system() != "Darwin":
