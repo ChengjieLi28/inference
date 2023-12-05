@@ -18,3 +18,12 @@ import torch
 def cuda_count():
     # even if install torch cpu, this interface would return 0.
     return torch.cuda.device_count()
+
+
+def get_visible_env_key_by_type(device_type: str) -> str:
+    if device_type == "CUDA":
+        return "CUDA_VISIBLE_DEVICES"
+    elif device_type == "HIP":
+        return "HIP_VISIBLE_DEVICES"
+    else:
+        raise RuntimeError(f"Not support device type `{device_type}` yet")

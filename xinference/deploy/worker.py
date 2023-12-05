@@ -20,8 +20,9 @@ from typing import Any, Optional
 import xoscar as xo
 from xoscar import MainActorPoolType
 
+from ..constants import XINFERENCE_DEVICE_TYPE
 from ..core.worker import WorkerActor
-from ..utils import cuda_count
+from ..utils import cuda_count, get_visible_env_key_by_type
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,9 @@ async def start_worker_components(
     address: str, supervisor_address: str, main_pool: MainActorPoolType
 ):
     cuda_device_indices = []
-    cuda_visible_devices = os.environ.get("HIP_VISIBLE_DEVICES")
+    cuda_visible_devices = os.environ.get(
+        get_visible_env_key_by_type(XINFERENCE_DEVICE_TYPE)
+    )
     if cuda_visible_devices:
         cuda_device_indices.extend([int(i) for i in cuda_visible_devices.split(",")])
     else:
