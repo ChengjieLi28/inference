@@ -198,7 +198,7 @@ class PytorchModel(LLM):
             )
 
         if device == "auto":
-            # When env HIP_VISIBLE_DEVICES=-1, torch.cuda.is_available() return False
+            # When env XXX_VISIBLE_DEVICES=-1, torch.cuda.is_available() return False
             if torch.cuda.is_available():
                 return "cuda"
             elif torch.backends.mps.is_available():
