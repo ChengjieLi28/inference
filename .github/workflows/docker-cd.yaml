@@ -50,7 +50,7 @@ jobs:
               export IMAGE_TAG="$GIT_TAG"
             else
               git checkout $branch
-              export IMAGE_TAG="nightly-$branch"
+              export IMAGE_TAG="nightly-test"
             fi
             docker build -t "xinference:${IMAGE_TAG}" --progress=plain -f xinference/deploy/docker/Dockerfile .
           done
