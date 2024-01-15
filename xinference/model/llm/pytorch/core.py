@@ -113,9 +113,13 @@ class PytorchModel(LLM):
             raise ImportError(
                 f"Failed to import module 'torch'. Please make sure 'torch' is installed.\n\n"
             )
+        from ....constants import XINFERENCE_DEVICE_TYPE
+        from ....utils import get_visible_env_key_by_type
         from .compression import load_compress_model
 
-        cuda_visible_devices_env = os.getenv("CUDA_VISIBLE_DEVICES", None)
+        cuda_visible_devices_env = os.getenv(
+            get_visible_env_key_by_type(XINFERENCE_DEVICE_TYPE), None
+        )
         cuda_visible_devices = (
             cuda_visible_devices_env.split(",") if cuda_visible_devices_env else []
         )

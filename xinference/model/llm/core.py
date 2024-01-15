@@ -77,9 +77,12 @@ class LLM(abc.ABC):
 
     @staticmethod
     def _get_cuda_count():
-        from ...utils import cuda_count
+        from ...constants import XINFERENCE_DEVICE_TYPE
+        from ...utils import cuda_count, get_visible_env_key_by_type
 
-        cuda_visible_devices = os.getenv("CUDA_VISIBLE_DEVICES", None)
+        cuda_visible_devices = os.getenv(
+            get_visible_env_key_by_type(XINFERENCE_DEVICE_TYPE), None
+        )
         if cuda_visible_devices is None:
             return cuda_count()
 

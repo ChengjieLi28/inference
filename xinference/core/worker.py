@@ -214,7 +214,11 @@ class WorkerActor(xo.StatelessActor):
         model_type: Optional[str] = None,
         n_gpu: Optional[Union[int, str]] = "auto",
     ) -> Tuple[str, List[str]]:
+        from ..constants import XINFERENCE_DEVICE_TYPE
+        from ..utils import get_visible_env_key_by_type
+
         env = {}
+        env_key = get_visible_env_key_by_type(XINFERENCE_DEVICE_TYPE)
         devices = []
         if isinstance(n_gpu, int) or (n_gpu == "auto" and cuda_count() > 0):
             # Currently, n_gpu=auto means using 1 GPU
@@ -224,10 +228,10 @@ class WorkerActor(xo.StatelessActor):
                 if model_type in ["embedding", "rerank"]
                 else self.allocate_devices(model_uid=model_uid, n_gpu=gpu_cnt)
             )
-            env["CUDA_VISIBLE_DEVICES"] = ",".join([str(dev) for dev in devices])
+            env[env_key] = ",".join([str(dev) for dev in devices])
             logger.debug(f"GPU selected: {devices} for model {model_uid}")
         if n_gpu is None:
-            env["CUDA_VISIBLE_DEVICES"] = "-1"
+            env[env_key] = "-1"
             logger.debug(f"GPU disabled for model {model_uid}")
 
         if os.name != "nt" and platform.system() != "Darwin":

@@ -72,6 +72,9 @@ class SpeculativeModel(PytorchChatModel):
         return model, tokenizer
 
     def load(self):
+        from ....constants import XINFERENCE_DEVICE_TYPE
+        from ....utils import get_visible_env_key_by_type
+
         try:
             import torch
         except ImportError:
@@ -79,7 +82,9 @@ class SpeculativeModel(PytorchChatModel):
                 f"Failed to import module 'torch'. Please make sure 'torch' is installed.\n\n"
             )
 
-        cuda_visible_devices_env = os.getenv("CUDA_VISIBLE_DEVICES", None)
+        cuda_visible_devices_env = os.getenv(
+            get_visible_env_key_by_type(XINFERENCE_DEVICE_TYPE), None
+        )
         cuda_visible_devices = (
             cuda_visible_devices_env.split(",") if cuda_visible_devices_env else []
         )
