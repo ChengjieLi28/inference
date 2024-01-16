@@ -62,6 +62,10 @@ from ..types import (
     CreateCompletion,
     ImageList,
 )
+from .controller.role_management import create_role, list_roles, update_role
+from .controller.secret_management import create_secret, delete_secret, list_secrets
+from .controller.user_management import create_user, list_users, update_user
+from .database.core import Base, engine
 from .oauth2.core import get_user, verify_token
 from .oauth2.types import AuthStartupConfig, LoginUserForm, User
 from .oauth2.utils import create_access_token, get_password_hash, verify_password
@@ -156,8 +160,13 @@ class RESTfulAPI:
         self._port = port
         self._supervisor_ref = None
         self._auth_config: AuthStartupConfig = self.init_auth_config(auth_config_file)
+        self.init_db()
         self._router = APIRouter()
         self._app = FastAPI()
+
+    @staticmethod
+    def init_db():
+        Base.metadata.create_all(bind=engine)
 
     @staticmethod
     def init_auth_config(auth_config_file: Optional[str]):
@@ -388,6 +397,21 @@ class RESTfulAPI:
             if self.is_authenticated()
             else None,
         )
+
+        # user management
+        self._router.add_api_route("/v1/users", create_user, methods=["POST"])
+        self._router.add_api_route("/v1/users", list_users, methods=["GET"])
+        self._router.add_api_route("/v1/users", update_user, methods=["PUT"])
+
+        # secret management
+        self._router.add_api_route("/v1/secrets", create_secret, methods=["POST"])
+        self._router.add_api_route("/v1/secrets", list_secrets, methods=["GET"])
+        self._router.add_api_route("/v1/secrets", delete_secret, methods=["DELETE"])
+
+        # role management
+        self._router.add_api_route("/v1/roles", create_role, methods=["POST"])
+        self._router.add_api_route("/v1/roles", list_roles, methods=["GET"])
+        self._router.add_api_route("/v1/roles", update_role, methods=["PUT"])
 
         self._app.include_router(self._router)
 

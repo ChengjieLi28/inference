@@ -14,7 +14,7 @@
 import logging
 from typing import List, Optional, Union
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import JWTError, jwt
 from pydantic import BaseModel, ValidationError
@@ -47,9 +47,19 @@ class TokenData(BaseModel):
     scopes: List[str] = []
 
 
+def add_header_to_request(request: Request, key: str, value: str):
+    """
+    See https://github.com/tiangolo/fastapi/issues/3027#issuecomment-1004202602
+    """
+    request.headers.__dict__["_list"].append(
+        (key.encode(encoding="utf-8"), value.encode(encoding="utf-8"))
+    )
+
+
 def verify_token(
     security_scopes: SecurityScopes,
     token: Annotated[str, Depends(oauth2_scheme)],
+    request: Request,
     config: Optional[AuthStartupConfig] = Depends(get_db),
 ):
     if security_scopes.scopes:
@@ -73,6 +83,7 @@ def verify_token(
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
+        add_header_to_request(request, key="XINFERENCE-USERNAME", value=username)
         token_scopes = payload.get("scopes", [])
         # TODO: check expire
         token_data = TokenData(scopes=token_scopes, username=username)
