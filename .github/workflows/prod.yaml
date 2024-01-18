@@ -1,0 +1,82 @@
+name: Python CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    types: ['opened', 'reopened', 'synchronize']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Set up Python environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: flake8 Lint
+        uses: py-actions/flake8@v2
+        with:
+          path: "xinference"
+          args: "--config setup.cfg"
+      - name: black
+        uses: psf/black@stable
+        with:
+          src: "xinference"
+          options: "--check"
+          version: "23.12.0"
+      - uses: isort/isort-action@master
+        with:
+          sortPaths: "xinference"
+          configuration: "--check-only --diff --sp setup.cfg"
+      - name: mypy
+        run: pip install mypy && mypy --install-types --non-interactive xinference
+      - name: codespell
+        run: pip install codespell && codespell xinference
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      # ESLint and Prettier must be in `package.json`
+      - name: Install Node.js dependencies
+        run: cd xinference/web/ui && npm ci
+      - name: ESLint Check
+        run: cd xinference/web/ui && npx eslint .
+      - name: Prettier Check
+        run: cd xinference/web/ui && ./node_modules/.bin/prettier --check .
+
+  build_test_job:
+    runs-on: self-hosted
+    needs: lint
+    env:
+      CONDA_ENV: xinf
+      SELF_HOST_PYTHON: /root/miniconda3/envs/xinf/bin/python
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Test with pytest
+        env:
+          MODULE: ${{ matrix.module }}
+        run: |
+          pytest --timeout=1500 \
+            -W ignore::PendingDeprecationWarning \
+            --cov-config=setup.cfg --cov-report=xml --cov=xinference xinference/api/tests/test_restful_api.py
+        working-directory: .
