@@ -28,7 +28,7 @@ jobs:
       - name: Build and push Docker image
         shell: bash
         env:
-          DOCKER_ORG: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_ORG: xprobe
           PY_VERSION: ${{ matrix.python-version }}
         run: |
           sudo rm -rf /usr/share/dotnet
